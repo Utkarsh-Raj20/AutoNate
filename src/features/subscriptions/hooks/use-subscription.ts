@@ -5,6 +5,12 @@ export const useSubscription = () => {
   return useQuery({
     queryKey: ["subscription"],
     queryFn: async () => {
+      // Check if the customer plugin exists, otherwise return a default state
+      // @ts-ignore
+      if (!authClient.customer) {
+        return { activeSubscriptions: [] };
+      }
+      // @ts-ignore
       const { data } = await authClient.customer.state();
       return data;
     },
