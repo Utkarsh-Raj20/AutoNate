@@ -3,8 +3,12 @@
 import { createId } from "@paralleldrive/cuid2";
 import { useReactFlow } from "@xyflow/react";
 import {
+  FilterIcon,
+  GitBranchIcon,
   GlobeIcon,
+  MailIcon,
   MousePointerIcon,
+  TableIcon,
 } from "lucide-react";
 import { useCallback } from "react";
 import { toast } from "sonner";
@@ -83,6 +87,33 @@ const executionNodes: NodeTypeOption[] = [
     label: "Slack",
     description: "Send a message to Slack",
     icon: "/logos/slack.svg",
+  },
+  {
+    type: NodeType.GMAIL,
+    label: "Email (Resend)",
+    description: "Send an email via Resend API",
+    icon: "/logos/gmail.svg",
+  },
+  {
+    type: NodeType.GOOGLE_SHEETS,
+    label: "Google Sheets",
+    description: "Append a row to a Google Sheet",
+    icon: "/logos/googlesheets.svg",
+  },
+];
+
+const logicNodes: NodeTypeOption[] = [
+  {
+    type: NodeType.FILTER,
+    label: "Filter",
+    description: "Stop the workflow if a condition is not met",
+    icon: FilterIcon,
+  },
+  {
+    type: NodeType.ROUTER,
+    label: "Router (If/Else)",
+    description: "Route the workflow based on a condition",
+    icon: GitBranchIcon,
   },
 ];
 
@@ -197,6 +228,40 @@ export function NodeSelector({
         <Separator />
         <div>
           {executionNodes.map((nodeType) => {
+            const Icon = nodeType.icon;
+
+            return (
+              <div
+                key={nodeType.type}
+                className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary"
+                onClick={() => handleNodeSelect(nodeType)}
+              >
+                <div className="flex items-center gap-6 w-full overflow-hidden">
+                  {typeof Icon === "string" ? (
+                    <img
+                      src={Icon}
+                      alt={nodeType.label}
+                      className="size-5 object-contain rounded-sm"
+                    />
+                  ) : (
+                    <Icon className="size-5" />
+                  )}
+                  <div className="flex flex-col items-start text-left">
+                    <span className="font-medium text-sm">
+                      {nodeType.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {nodeType.description}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        <Separator />
+        <div>
+          {logicNodes.map((nodeType) => {
             const Icon = nodeType.icon;
 
             return (

@@ -11,6 +11,10 @@ import { OpenAiNode } from "@/features/executions/components/openai/node";
 import { AnthropicNode } from "@/features/executions/components/anthropic/node";
 import { DiscordNode } from "@/features/executions/components/discord/node";
 import { SlackNode } from "@/features/executions/components/slack/node";
+import { FilterNode } from "@/features/executions/components/filter/node";
+import { GmailNode } from "@/features/executions/components/gmail/node";
+import { GoogleSheetsNode } from "@/features/executions/components/google-sheets/node";
+import { RouterNode } from "@/features/executions/components/router/node";
 
 export const nodeComponents = {
   [NodeType.INITIAL]: InitialNode,
@@ -23,6 +27,10 @@ export const nodeComponents = {
   [NodeType.ANTHROPIC]: AnthropicNode,
   [NodeType.DISCORD]: DiscordNode,
   [NodeType.SLACK]: SlackNode,
+  [NodeType.FILTER]: FilterNode,
+  [NodeType.GMAIL]: GmailNode,
+  [NodeType.GOOGLE_SHEETS]: GoogleSheetsNode,
+  [NodeType.ROUTER]: RouterNode,
 } as const satisfies NodeTypes;
 
 export type RegisteredNodeType = keyof typeof nodeComponents;

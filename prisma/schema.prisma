@@ -121,6 +121,10 @@ enum NodeType {
   OPENAI
   DISCORD
   SLACK
+  FILTER
+  GMAIL
+  GOOGLE_SHEETS
+  ROUTER
 }
 
 model Node {
