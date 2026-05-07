@@ -45,3 +45,13 @@ export async function POST(request: NextRequest) {
     );
   }
 };
+
+export async function GET() {
+  return NextResponse.json(
+    { 
+      message: "Google Form Webhook is active. Please use POST to trigger workflows.",
+      status: "ready" 
+    },
+    { status: 200 },
+  );
+}
