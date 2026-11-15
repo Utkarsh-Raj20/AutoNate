@@ -93,7 +93,16 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
   let apiKey: string;
   try {
     apiKey = decrypt(credential.value);
+    // Trim any whitespace
+    apiKey = apiKey.trim();
+    
+    // Log for debugging (only in non-production or with sanitization)
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[Gemini Executor] API Key length:", apiKey.length);
+      console.log("[Gemini Executor] API Key starts with:", apiKey.substring(0, 10));
+    }
   } catch (error) {
+    console.error("[Gemini Executor] Decryption failed:", error);
     await publish(
       geminiChannel().status({
         nodeId,
@@ -105,7 +114,8 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     );
   }
 
-  if (!apiKey || apiKey.trim() === "") {
+  if (!apiKey || apiKey.length === 0) {
+    console.error("[Gemini Executor] API key is empty after decryption");
     await publish(
       geminiChannel().status({
         nodeId,
@@ -115,8 +125,23 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     throw new NonRetriableError("Gemini node: Decrypted API key is empty");
   }
 
+  // Validate API key format (Gemini keys usually start with "AI")
+  if (!apiKey.startsWith("AI")) {
+    console.error("[Gemini Executor] API key doesn't appear to be a valid Gemini key");
+    await publish(
+      geminiChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError(
+      "Gemini node: API key format is invalid. Gemini API keys should start with 'AI'. " +
+      "Please verify you're using the correct API key."
+    );
+  }
+
   const google = createGoogleGenerativeAI({
-    apiKey,
+    apiKey: apiKey,
   });
 
   try {
