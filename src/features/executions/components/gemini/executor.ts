@@ -19,6 +19,7 @@ type GeminiData = {
   credentialId?: string;
   systemPrompt?: string;
   userPrompt?: string;
+  model?: string; // Optional model selection
 };
 
 export const geminiExecutor: NodeExecutor<GeminiData> = async ({
@@ -145,12 +146,15 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     apiKey: apiKey,
   });
 
+  // Use the model specified in data, or default to gemini-2.0-flash-exp
+  const modelName = data.model || "gemini-2.0-flash-exp";
+
   try {
     const { steps } = await step.ai.wrap(
       "gemini-generate-text",
       generateText,
       {
-        model: google("gemini-2.5-flash"),
+        model: google(modelName),
         system: systemPrompt,
         prompt: userPrompt,
         experimental_telemetry: {
