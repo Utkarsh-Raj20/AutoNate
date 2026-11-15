@@ -146,10 +146,13 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     apiKey: apiKey,
   });
 
-  // Use the model specified in data, or default to gemini-3.8-flash (stable)
-  const modelName = data.model || "gemini-3.8-flash";
+  // Use the model specified in data, or default to gemini-4-hydrogen (fastest)
+  const modelName = data.model || "gemini-4-hydrogen";
 
   try {
+    const startTime = Date.now();
+    console.log(`[Gemini Executor] Starting text generation with model: ${modelName}`);
+    
     const { steps } = await step.ai.wrap(
       "gemini-generate-text",
       generateText,
@@ -164,6 +167,9 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
         },
       },
     );
+
+    const elapsed = Date.now() - startTime;
+    console.log(`[Gemini Executor] Text generation completed in ${elapsed}ms`);
 
     const text = 
       steps[0].content[0].type === "text" 
@@ -184,6 +190,7 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
       },
     }
   } catch (error) {
+    console.error("[Gemini Executor] Error during text generation:", error);
      await publish(
       geminiChannel().status({
         nodeId,
