@@ -90,8 +90,33 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     throw new NonRetriableError("Gemini node: Credential not found");
   }
 
+  let apiKey: string;
+  try {
+    apiKey = decrypt(credential.value);
+  } catch (error) {
+    await publish(
+      geminiChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError(
+      `Gemini node: Failed to decrypt API key. Ensure ENCRYPTION_KEY is set correctly in production. Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+
+  if (!apiKey || apiKey.trim() === "") {
+    await publish(
+      geminiChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError("Gemini node: Decrypted API key is empty");
+  }
+
   const google = createGoogleGenerativeAI({
-    apiKey: decrypt(credential.value),
+    apiKey,
   });
 
   try {

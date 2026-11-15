@@ -90,8 +90,33 @@ export const anthropicExecutor: NodeExecutor<AnthropicData> = async ({
     throw new NonRetriableError("Anthropic node: Credential not found");
   }
 
+  let apiKey: string;
+  try {
+    apiKey = decrypt(credential.value);
+  } catch (error) {
+    await publish(
+      anthropicChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError(
+      `Anthropic node: Failed to decrypt API key. Ensure ENCRYPTION_KEY is set correctly in production. Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+
+  if (!apiKey || apiKey.trim() === "") {
+    await publish(
+      anthropicChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError("Anthropic node: Decrypted API key is empty");
+  }
+
   const anthropic = createAnthropic({
-    apiKey: decrypt(credential.value),
+    apiKey,
   });
 
   try {

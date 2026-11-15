@@ -90,8 +90,33 @@ export const openAiExecutor: NodeExecutor<OpenAiData> = async ({
     throw new NonRetriableError("OpenAI node: Credential not found");
   }
 
+  let apiKey: string;
+  try {
+    apiKey = decrypt(credential.value);
+  } catch (error) {
+    await publish(
+      openAiChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError(
+      `OpenAI node: Failed to decrypt API key. Ensure ENCRYPTION_KEY is set correctly in production. Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
+  }
+
+  if (!apiKey || apiKey.trim() === "") {
+    await publish(
+      openAiChannel().status({
+        nodeId,
+        status: "error",
+      })
+    );
+    throw new NonRetriableError("OpenAI node: Decrypted API key is empty");
+  }
+
   const openai = createOpenAI({
-    apiKey: decrypt(credential.value),
+    apiKey,
   });
 
   try {
