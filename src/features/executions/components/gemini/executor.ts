@@ -125,9 +125,10 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     throw new NonRetriableError("Gemini node: Decrypted API key is empty");
   }
 
-  // Validate API key format (Gemini keys usually start with "AI")
-  if (!apiKey.startsWith("AI")) {
-    console.error("[Gemini Executor] API key doesn't appear to be a valid Gemini key");
+  // Basic validation: Gemini keys are typically 39+ characters
+  // They can start with "AIza" (old format) or "AQ" (new format)
+  if (apiKey.length < 30) {
+    console.error("[Gemini Executor] API key appears to be too short");
     await publish(
       geminiChannel().status({
         nodeId,
@@ -135,8 +136,8 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
       })
     );
     throw new NonRetriableError(
-      "Gemini node: API key format is invalid. Gemini API keys should start with 'AI'. " +
-      "Please verify you're using the correct API key."
+      "Gemini node: API key appears to be invalid (too short). " +
+      "Please verify you're using the correct API key from Google AI Studio."
     );
   }
 

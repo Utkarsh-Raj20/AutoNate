@@ -42,8 +42,14 @@ async function verifyCredentials() {
       console.log(`   📏 Length: ${decrypted.length}`);
       console.log(`   🔑 Starts with: ${decrypted.substring(0, 10)}...`);
       
-      if (cred.type === "GEMINI" && !decrypted.startsWith("AI")) {
-        console.log(`   ⚠️  WARNING: Gemini API key should start with "AI"`);
+      if (cred.type === "GEMINI") {
+        // Google now issues keys starting with "AIza" (old) or "AQ" (new)
+        if (!decrypted.startsWith("AIza") && !decrypted.startsWith("AQ")) {
+          console.log(`   ⚠️  WARNING: Gemini API key should start with "AIza" or "AQ"`);
+        }
+        if (decrypted.length < 30) {
+          console.log(`   ⚠️  WARNING: Gemini API key appears too short`);
+        }
       }
       
       if (decrypted.trim() !== decrypted) {
