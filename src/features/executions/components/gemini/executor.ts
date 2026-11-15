@@ -166,7 +166,28 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     const elapsed = Date.now() - startTime;
     console.log(`[Gemini Executor] Text generation completed in ${elapsed}ms`);
 
-    const text = result.text || "";
+    // Extract text from the AI SDK response structure
+    let text = "";
+    if (result.text) {
+      // Simple text response
+      text = result.text;
+    } else if (result.steps && result.steps.length > 0) {
+      // Steps-based response
+      const firstStep = result.steps[0];
+      if (firstStep.content && firstStep.content.length > 0) {
+        const firstContent = firstStep.content[0];
+        if (firstContent.type === "text" && "text" in firstContent) {
+          text = firstContent.text;
+        }
+      }
+    }
+    
+    if (!text) {
+      console.error("[Gemini Executor] Unexpected response structure:", JSON.stringify(result));
+      throw new Error("Unable to extract text from Gemini response");
+    }
+    
+    console.log(`[Gemini Executor] Extracted text length: ${text.length} chars`);
     
     await publish(
       geminiChannel().status({
