@@ -146,8 +146,8 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
     apiKey: apiKey,
   });
 
-  // Use the model specified in data, or default to gemini-2.0-flash-exp
-  const modelName = data.model || "gemini-2.0-flash-exp";
+  // Use the model specified in data, or default to gemini-3.8-flash (stable)
+  const modelName = data.model || "gemini-3.8-flash";
 
   try {
     const { steps } = await step.ai.wrap(
