@@ -152,29 +152,21 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({
   try {
     const startTime = Date.now();
     console.log(`[Gemini Executor] Starting text generation with model: ${modelName}`);
+    console.log(`[Gemini Executor] User prompt length: ${userPrompt.length} chars`);
+    console.log(`[Gemini Executor] System prompt length: ${systemPrompt.length} chars`);
     
-    const { steps } = await step.ai.wrap(
-      "gemini-generate-text",
-      generateText,
-      {
+    const result = await step.run("gemini-generate-text", async () => {
+      return generateText({
         model: google(modelName),
         system: systemPrompt,
         prompt: userPrompt,
-        experimental_telemetry: {
-          isEnabled: true,
-          recordInputs: true,
-          recordOutputs: true,
-        },
-      },
-    );
+      });
+    });
 
     const elapsed = Date.now() - startTime;
     console.log(`[Gemini Executor] Text generation completed in ${elapsed}ms`);
 
-    const text = 
-      steps[0].content[0].type === "text" 
-        ? steps[0].content[0].text
-        : "";
+    const text = result.text || "";
     
     await publish(
       geminiChannel().status({
